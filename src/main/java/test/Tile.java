@@ -113,9 +113,12 @@ public class Tile {
 
         public void put(Tile other) {
             if (size() < 98) {
+                if (other.letter >= 'A' && other.letter <= 'Z')
+                {
                 int tileToInt = other.letter - 'A';
                 if (quantitiesCounter[tileToInt] < defaultQuantities[tileToInt])
                     quantitiesCounter[tileToInt]++;
+                }
             }
         }
     }
