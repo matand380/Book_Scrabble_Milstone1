@@ -25,6 +25,7 @@ public class Tile {
         return Objects.hash(letter, score);
     }
 
+
     public static class Bag {
         final int[] defaultQuantities;
         int[] quantitiesCounter;

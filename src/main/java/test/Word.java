@@ -40,4 +40,11 @@ public class Word {
         if (!(o instanceof Word word)) return false;
         return row == word.row && col == word.col && vertical == word.vertical && Arrays.equals(tiles, word.tiles);
     }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(row, col, vertical);
+        result = 31 * result + Arrays.hashCode(tiles);
+        return result;
+    }
 }
