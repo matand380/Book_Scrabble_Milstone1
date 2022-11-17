@@ -61,13 +61,13 @@ public class MainTrain {
 		for(int i=0;i<ts.length;i++)
 			ts[i]=bag.getRand();
 
-		Word w0=new Word(ts,0,6,true);
-		Word w1=new Word(ts,7,6,false);
-		Word w2=new Word(ts,6,7,true);
-		Word w3=new Word(ts,-1,7,true);
-		Word w4=new Word(ts,7,-1,false);
-		Word w5=new Word(ts,0,7,true);
-		Word w6=new Word(ts,7,0,false);
+		Word w0=new Word(ts,0,6,true); // not on the center
+		Word w1=new Word(ts,7,6,false);// out of grid
+		Word w2=new Word(ts,6,7,true); // out of grid
+		Word w3=new Word(ts,-1,7,true); // out of range vertical
+		Word w4=new Word(ts,7,-1,false); // out of range horizontal
+		Word w5=new Word(ts,0,7,true); // ok
+		Word w6=new Word(ts,7,0,false); // ok
 
 		if(b.boardLegal(w0) || b.boardLegal(w1) || b.boardLegal(w2) || b.boardLegal(w3) || b.boardLegal(w4) || !b.boardLegal(w5) || !b.boardLegal(w6))
 			System.out.println("your boardLegal function is wrong (-10)");

@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b3e5c07c-b531-46fc-9995-f9acaf7fb672" name="Changes" comment="initial commit - Tile.java complete 1.1">
+    <list default="true" id="b3e5c07c-b531-46fc-9995-f9acaf7fb672" name="Changes" comment="working on Board class 1.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/test/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/test/Board.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/test/MainTrain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/test/MainTrain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/test/Word.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/test/Word.java" afterDir="false" />
@@ -41,7 +40,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settings.ide.settings.uml"
+    "settings.editor.selected.configurable": "reference.projectsettings.compiler.javacompiler"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -53,7 +52,10 @@
       <option name="presentableId" value="Default" />
       <updated>1668161212780</updated>
       <workItem from="1668161214471" duration="2346000" />
-      <workItem from="1668165278315" duration="18456000" />
+      <workItem from="1668165278315" duration="22316000" />
+      <workItem from="1668458693399" duration="729000" />
+      <workItem from="1668495857311" duration="9555000" />
+      <workItem from="1668674238431" duration="20659000" />
     </task>
     <task id="LOCAL‎-00001" summary="initial commit - Tile.java complete">
       <created>1668197558289</created>
@@ -69,7 +71,14 @@
       <option name="project" value="LOCAL‎" />
       <updated>1668197754500</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL‎-00003" summary="working on Board class 1.0">
+      <created>1668454979255</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL‎-00003" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1668454979255</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -90,29 +99,16 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="initial commit - Tile.java complete" />
     <MESSAGE value="initial commit - Tile.java complete 1.1" />
-    <option name="LAST_COMMIT_MESSAGE" value="initial commit - Tile.java complete 1.1" />
+    <MESSAGE value="working on Board class 1.0" />
+    <option name="LAST_COMMIT_MESSAGE" value="working on Board class 1.0" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/test/Word.java</url>
-          <line>47</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/test/MainTrain.java</url>
-          <line>69</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/main/java/test/MainTrain.java</url>
-          <line>52</line>
-          <properties class="test.MainTrain" method="testBoard">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="11" />
+          <line>77</line>
+          <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -9,7 +9,7 @@ public class Word {
     Tile[] tiles;
     int row;
     int col;
-    boolean vertical;
+    boolean vertical; //true represent vertical, false represent horizontal
 
     public Tile[] getTiles() {
         return tiles;
