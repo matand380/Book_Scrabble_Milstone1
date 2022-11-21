@@ -37,7 +37,8 @@ public class Tile {
 
         private Bag() {
             this.defaultQuantities = new int[]{9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
-            this.quantitiesCounter = defaultQuantities.clone();
+            this.quantitiesCounter = new int[26];
+            System.arraycopy(defaultQuantities,0,quantitiesCounter,0,26);
             this.tilesArray = new Tile[26];
             tilesArray[0] = new Tile('A', 1);
             tilesArray[1] = new Tile('B', 3);
@@ -109,7 +110,10 @@ public class Tile {
         }
 
         public int[] getQuantities() {
-            return quantitiesCounter.clone();
+            int[] quantities = new int[26];
+            System.arraycopy(quantitiesCounter,0,quantities,0,26);
+            return quantities;
+
         }
 
         public void put(Tile other) {

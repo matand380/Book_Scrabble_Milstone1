@@ -2,28 +2,18 @@ package test;
 
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 
 public class Board {
 
-    private static Board boardInstance = null;
-
-    private int wordCounter = 0;
-
-
-    private static final int width = 15;
-    private static final int height = 15;
     public static final int doubleWord = 1;
     public static final int tripleWord = 2;
     public static final int doubleLetter = 3;
     public static final int tripleLetter = 4;
-
-    private Tile[][] gameGrid; // this is Tiles matrix for every game situation
-    private Location[][] grid; //the base grid for the game
-    private Map<Location, Integer> bonusSquares; //save in map all the bonus squares
-
+    private static final int width = 15;
+    private static final int height = 15;
+    private static Board boardInstance = null;
     private final Location boardCenter = new Location(7, 7);
-
     private final Location[] tripleWordLocation = new Location[]{
             new Location(0, 0),
             new Location(7, 0),
@@ -32,8 +22,7 @@ public class Board {
             new Location(14, 7),
             new Location(0, 14),
             new Location(7, 14),
-            new Location(14, 14)
-    };
+            new Location(14, 14)};
     private final Location[] tripleLetterLocation = new Location[]{
             new Location(5, 1),
             new Location(9, 1),
@@ -46,8 +35,7 @@ public class Board {
             new Location(9, 9),
             new Location(13, 9),
             new Location(5, 13),
-            new Location(9, 13)
-    };
+            new Location(9, 13)};
     private final Location[] doubleLetterLocation = new Location[]{
             new Location(3, 0),
             new Location(11, 0),
@@ -72,8 +60,7 @@ public class Board {
             new Location(6, 12),
             new Location(8, 12),
             new Location(3, 14),
-            new Location(11, 14),
-    };
+            new Location(11, 14),};
     private final Location[] doubleWordLocation = new Location[]{
             new Location(1, 1),
             new Location(1, 13),
@@ -91,16 +78,11 @@ public class Board {
             new Location(12, 12),
             new Location(13, 1),
             new Location(13, 13),
-            new Location(7, 7),
-    };
-
-    public int getWordCounter() {
-        return wordCounter;
-    }
-
-    public void setWordCounter(int wordCounter) {
-        this.wordCounter = wordCounter;
-    }
+            new Location(7, 7),};
+    private int wordCounter = 0;
+    private Tile[][] gameGrid; // this is Tiles matrix for every game situation
+    private Location[][] grid; //the base grid for the game
+    private Map<Location, Integer> bonusTiles; //save in map all the bonus squares
 
     /*
      * Board C'tor
@@ -109,18 +91,18 @@ public class Board {
      * initialize grid
      */
     private Board() {
-        bonusSquares = new HashMap<Location, Integer>();
+        bonusTiles = new HashMap<>();
         for (Location loc : tripleWordLocation) {
-            bonusSquares.put(loc, tripleWord);
+            bonusTiles.put(loc, tripleWord);
         }
         for (Location loc : tripleLetterLocation) {
-            bonusSquares.put(loc, tripleLetter);
+            bonusTiles.put(loc, tripleLetter);
         }
         for (Location loc : doubleLetterLocation) {
-            bonusSquares.put(loc, doubleLetter);
+            bonusTiles.put(loc, doubleLetter);
         }
         for (Location loc : doubleWordLocation) {
-            bonusSquares.put(loc, doubleWord);
+            bonusTiles.put(loc, doubleWord);
         }
         grid = new Location[width][height];
         for (int i = 0; i < width; i++) {
@@ -136,6 +118,20 @@ public class Board {
         }
     }
 
+    public static Board getBoard() {
+        if (boardInstance == null) {
+            return boardInstance = new Board();
+        } else return boardInstance;
+    }
+
+    public int getWordCounter() {
+        return wordCounter;
+    }
+
+    public void setWordCounter(int wordCounter) {
+        this.wordCounter = wordCounter;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -144,14 +140,6 @@ public class Board {
         return height;
     }
 
-
-    public static Board getBoard() {
-        if (boardInstance == null) {
-            return boardInstance = new Board();
-        } else return boardInstance;
-    }
-
-    
     public Tile[][] getTiles() {
         return gameGrid.clone();
     }
@@ -175,13 +163,32 @@ public class Board {
         return true;
     }
 
-    // TODO: 17/11/2022 keep working
     public int getScore(Word word) {
-        wordToLocation(word);
+        Location[] checkBonus = wordToLocation(word);
+        int sum = 0;
+        int DW = 1;
+        int TW = 1;
 
+        for (Location l : checkBonus) {
+            if (Arrays.stream(doubleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
+                sum += l.getTile().score * 2;
+            } else if (Arrays.stream(tripleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
+                sum += l.getTile().score * 3;
 
-        return 1;
+            } else if (Arrays.stream(doubleWordLocation).anyMatch(location -> location.locationCompare(l))) {
+                sum += l.getTile().score;
+                DW = 2;
+
+            } else if (Arrays.stream(tripleWordLocation).anyMatch(location -> location.locationCompare(l))) {
+                sum += l.getTile().score;
+                TW = 3;
+            } else {
+                sum += l.getTile().score;
+            }
+        }
+        return sum * TW * DW;
     }
+
 
     public int tryPlaceWord(Word word) {
         boolean dictionaryLegal = dictionaryLegal(word);
@@ -193,8 +200,7 @@ public class Board {
                 sum += getScore(w);
             }
             return sum;
-        } else
-            return 0;
+        } else return 0;
     }
 
     // TODO: 17/11/2022 keep working
@@ -208,15 +214,29 @@ public class Board {
     }
 
     ///private  helper methods
-    // TODO: 17/11/2022 keep working 
+// TODO: 20/11/2022 this method doesn't work
+    //gets the word without the required replacement (e.g. without R in FARMS)
     private boolean notRequireLetterReplacement(Word word) {
+        if (word.isVertical()) {
+            for (int i = word.getRow(); i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] == null && gameGrid[i][word.getCol()] == null || word.getTiles()[i] != null && gameGrid[i][word.getCol()] != null)
+                    return false;
+            }
+        } else
+            for (int i = word.getCol(); i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null && gameGrid[i][word.getRow()] != null || word.getTiles()[i] != null && gameGrid[i][word.getRow()] != null)
+                    return false;
+
+            }
         return true;
+
     }
 
-    // TODO: 17/11/2022 keep working 
+    // TODO: 17/11/2022 keep working, this method doesn't work
     private boolean isTileConnected(Word word) {
         return true;
     }
+
 
     private boolean firstWordCheck(Word word) {
         if (gameGrid[7][7] == null) {
@@ -233,24 +253,31 @@ public class Board {
         if (word.getRow() >= 0 && word.getCol() >= 0 && word.getRow() < width && word.getCol() < height) {
             if (word.isVertical()) {
                 return word.getRow() + word.getTiles().length < width;
-            } else
-                return word.getCol() + word.getTiles().length < height;
-        } else
-            return false;
+            } else return word.getCol() + word.getTiles().length < height;
+        } else return false;
     }
 
-    private void wordToLocation(Word word) {
+    private Location[] wordToLocation(Word word) {
+        Location[] temp = new Location[word.getTiles().length];
         if (word.isVertical()) {
             for (int i = 0; i < word.getTiles().length; i++) {
-                grid[word.getRow() + i][word.getCol()] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
-            }
+                temp[i] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
 
+            }
         } else
             for (int i = 0; i < word.getTiles().length; i++) {
-                grid[word.getCol() + i][word.getRow()] = new Location(word.getCol() + i, word.getRow(), word.getTiles()[i]);
+                temp[i] = new Location(word.getCol() + i, word.getRow(), word.getTiles()[i]);
             }
-
+        return temp;
     }
+
+    // TODO: 19/11/2022 think again about this method
+    private Tile locationToTile(Location location) {
+        if (location.x < 0 || location.y < 0 || location.x >= width || location.y >= height || location.tile == null)
+            return null;
+        return grid[location.x][location.y].tile;
+    }
+
 
     //helper class - Location
     public class Location {
@@ -285,12 +312,12 @@ public class Board {
             return tile;
         }
 
-        public boolean isOccupied() {
-            return tile != null;
-        }
-
         public void setTile(Tile t) {
             tile = t;
+        }
+
+        public boolean isOccupied() {
+            return tile != null;
         }
 
         public boolean locationCompare(Location other) {
