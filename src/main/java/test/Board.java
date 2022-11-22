@@ -84,6 +84,7 @@ public class Board {
     private Location[][] grid; //the base grid for the game
     private Map<Location, Integer> bonusTiles; //save in map all the bonus squares
 
+
     /*
      * Board C'tor
      * initialize bonus squares
@@ -168,12 +169,15 @@ public class Board {
     }
 
     public int getScore(Word word) {
+        // TODO: 22/11/2022 The function has to remove bonuses that already given
+        // TODO: 22/11/2022 resolve the get method in the hashmap
         Location[] checkBonus = wordToLocation(word);
         int sum = 0;
         int DW = 1;
         int TW = 1;
 
         for (Location l : checkBonus) {
+//            Integer y = bonusTiles.get(l);
             if (Arrays.stream(doubleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
                 sum += l.getTile().score * 2;
             } else if (Arrays.stream(tripleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
@@ -220,6 +224,7 @@ public class Board {
 
 
     private void setTilesOnBoard(Word word) {
+        // TODO: 22/11/2022 remove tiles of the word from the quantitiesCounter
         int i;
         if (word.isVertical()) {
             for (i = 0; i < word.getTiles().length; i++) {
@@ -265,22 +270,22 @@ public class Board {
 
     }
 
-    // TODO: 17/11/2022 keep working, this method doesn't work
+    // TODO: 17/11/2022 check again this method in the end
     private boolean isTileConnected(Word word) {
-        int currentRow = word.getRow(), currentCol = word.getCol();
+        int currRow = word.getRow(), currCol = word.getCol();
         for (int i = 0; i < word.getTiles().length; i++) {
-            if (currentRow - 1 >= 0 && gameGrid[currentRow - 1][currentCol] != null)
+            if (currRow - 1 >= 0 && gameGrid[currRow - 1][currCol] != null)
                 return true;
-            if (currentRow + 1 >= 0 && gameGrid[currentRow + 1][currentCol] != null)
+            if (currRow + 1 >= 0 && gameGrid[currRow + 1][currCol] != null)
                 return true;
-            if (currentCol - 1 >= width && gameGrid[currentRow][currentCol - 1] != null)
+            if (currCol - 1 >= width && gameGrid[currRow][currCol - 1] != null)
                 return true;
-            if (currentCol + 1 >= width && gameGrid[currentRow][currentCol + 1] != null) // check
+            if (currCol + 1 >= width && gameGrid[currRow][currCol + 1] != null) // check
                 return true;
             if (word.isVertical()) {
-                currentRow += 1;
+                currRow += 1;
             } else {
-                currentCol += 1;
+                currCol += 1;
             }
         }
         return false;
@@ -309,23 +314,30 @@ public class Board {
     private Location[] wordToLocation(Word word) {
         Location[] temp = new Location[word.getTiles().length];
         if (word.isVertical()) {
-            for (int i = 0; i < word.getTiles().length && word.getTiles()[i] != null; i++) {
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i]!=null)
+                {
                 temp[i] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
+                }
+                else if (word.getTiles()[i]==null)
+                {
+                    temp[i] = new Location(word.getRow() + i, word.getCol(), gameGrid[word.getRow() + i][word.getCol()]);
+
+                }
 
             }
         } else
-            for (int i = 0; i < word.getTiles().length && word.getTiles()[i] != null; i++) {
-                temp[i] = new Location(word.getCol() + i, word.getRow(), word.getTiles()[i]);
-                //;
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i]!=null){
+                    temp[i] = new Location(word.getRow(), word.getCol() + i, word.getTiles()[i]);
+            }
+            else if (word.getTiles()[i]==null)
+        {
+            temp[i] = new Location(word.getRow(), word.getCol() + i, gameGrid[word.getRow()][word.getCol()+i]);
+
+        }
             }
         return temp;
-    }
-
-    // TODO: 19/11/2022 think again about this method
-    private Tile locationToTile(Location location) {
-        if (location.x < 0 || location.y < 0 || location.x >= width || location.y >= height || location.tile == null)
-            return null;
-        return grid[location.x][location.y].tile;
     }
 
 
@@ -388,7 +400,6 @@ public class Board {
     }
 }
 
-// TODO: 14/11/2022 all the checks need to be done: 
 /*
 *Checklist for new words:
 *
