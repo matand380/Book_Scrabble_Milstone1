@@ -144,6 +144,10 @@ public class Board {
         return gameGrid.clone();
     }
 
+    ///private  helper methods
+    private void setTiles(Word word) {
+    }
+
     public boolean boardLegal(Word word) {
         boolean gridLegal = isGridLegal(word);
         boolean firstWord;
@@ -189,7 +193,6 @@ public class Board {
         return sum * TW * DW;
     }
 
-
     public int tryPlaceWord(Word word) {
         boolean dictionaryLegal = dictionaryLegal(word);
         boolean boardLegal = boardLegal(word);
@@ -197,44 +200,90 @@ public class Board {
             int sum = 0;
             ArrayList<Word> words = new ArrayList<>(getWords(word));
             for (Word w : words) {
-                sum += getScore(w);
+                if (dictionaryLegal(w)) {
+                    setWordCounter(getWordCounter() + 1);
+                   setTilesOnBoard(w);
+                    sum += getScore(w);
+                }
             }
             return sum;
         } else return 0;
     }
 
+
     // TODO: 17/11/2022 keep working
     public ArrayList<Word> getWords(Word word) {
-        ArrayList<Word> temp = new ArrayList<Word>();
+        ArrayList<Word> temp = new ArrayList<>();
         temp.add(word);
-        //need to put the word in the Tile[][]
-        setWordCounter(getWordCounter() + temp.size());
-
         return temp;
     }
 
-    ///private  helper methods
-// TODO: 20/11/2022 this method doesn't work
+
+    private void setTilesOnBoard(Word word) {
+        int i;
+        if (word.isVertical()) {
+            for (i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] == null && gameGrid[word.getRow() + i][word.getCol()] != null) {
+                    continue;
+                } else {
+                    gameGrid[word.getRow() + i][word.getCol()] = word.getTiles()[i];
+                }
+            }
+
+        } else
+            for (i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] == null && gameGrid[word.getRow()][word.getCol() + i] != null) {
+                    continue;
+                } else {
+                    gameGrid[word.getRow()][word.getCol() + i] = word.getTiles()[i];
+                }
+            }
+    }
+
     //gets the word without the required replacement (e.g. without R in FARMS)
     private boolean notRequireLetterReplacement(Word word) {
+        int i;
         if (word.isVertical()) {
-            for (int i = word.getRow(); i < word.getTiles().length; i++) {
-                if (word.getTiles()[i] == null && gameGrid[i][word.getCol()] == null || word.getTiles()[i] != null && gameGrid[i][word.getCol()] != null)
+            for (i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null) {
+                    if (gameGrid[word.getRow() + i][word.getCol()] != null)
+                        return false;
+                } else if (word.getTiles()[i] == null && gameGrid[word.getRow() + i][word.getCol()] == null)
                     return false;
             }
         } else
-            for (int i = word.getCol(); i < word.getTiles().length; i++) {
-                if (word.getTiles()[i] != null && gameGrid[i][word.getRow()] != null || word.getTiles()[i] != null && gameGrid[i][word.getRow()] != null)
+            for (i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null) {
+                    if (gameGrid[word.getRow()][word.getCol() + i] != null)
+                        return false;
+                } else if (word.getTiles()[i] == null && gameGrid[word.getRow()][word.getCol() + i] == null) {
                     return false;
-
+                }
             }
         return true;
+
 
     }
 
     // TODO: 17/11/2022 keep working, this method doesn't work
     private boolean isTileConnected(Word word) {
-        return true;
+        int currentRow = word.getRow(), currentCol = word.getCol();
+        for (int i = 0; i < word.getTiles().length; i++) {
+            if (currentRow - 1 >= 0 && gameGrid[currentRow - 1][currentCol] != null)
+                return true;
+            if (currentRow + 1 >= 0 && gameGrid[currentRow + 1][currentCol] != null)
+                return true;
+            if (currentCol - 1 >= width && gameGrid[currentRow][currentCol - 1] != null)
+                return true;
+            if (currentCol + 1 >= width && gameGrid[currentRow][currentCol + 1] != null) // check
+                return true;
+            if (word.isVertical()) {
+                currentRow += 1;
+            } else {
+                currentCol += 1;
+            }
+        }
+        return false;
     }
 
 
@@ -260,13 +309,14 @@ public class Board {
     private Location[] wordToLocation(Word word) {
         Location[] temp = new Location[word.getTiles().length];
         if (word.isVertical()) {
-            for (int i = 0; i < word.getTiles().length; i++) {
+            for (int i = 0; i < word.getTiles().length && word.getTiles()[i] != null; i++) {
                 temp[i] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
 
             }
         } else
-            for (int i = 0; i < word.getTiles().length; i++) {
+            for (int i = 0; i < word.getTiles().length && word.getTiles()[i] != null; i++) {
                 temp[i] = new Location(word.getCol() + i, word.getRow(), word.getTiles()[i]);
+                //;
             }
         return temp;
     }

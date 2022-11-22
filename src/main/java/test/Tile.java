@@ -27,25 +27,23 @@ public class Tile {
 
 
     public static class Bag {
+        private static Bag bagInstance = null;
         final int[] defaultQuantities;
         int[] quantitiesCounter;
         Tile[] tilesArray;
 
 
-        private static Bag bagInstance = null;
-
-
         private Bag() {
             this.defaultQuantities = new int[]{9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1};
             this.quantitiesCounter = new int[26];
-            System.arraycopy(defaultQuantities,0,quantitiesCounter,0,26);
+            System.arraycopy(defaultQuantities, 0, quantitiesCounter, 0, 26);
             this.tilesArray = new Tile[26];
             tilesArray[0] = new Tile('A', 1);
             tilesArray[1] = new Tile('B', 3);
             tilesArray[2] = new Tile('C', 3);
             tilesArray[3] = new Tile('D', 2);
             tilesArray[4] = new Tile('E', 1);
-            tilesArray[5] = new Tile('F', 1);
+            tilesArray[5] = new Tile('F', 4);
             tilesArray[6] = new Tile('G', 2);
             tilesArray[7] = new Tile('H', 4);
             tilesArray[8] = new Tile('I', 1);
@@ -77,14 +75,22 @@ public class Tile {
 
         public Tile getRand() {
             if (size() > 0) {
-                int rnd = new Random().nextInt(tilesArray.length);
+                int rnd = new Random().nextInt(defaultQuantities.length);
                 if (quantitiesCounter[rnd] != 0) {
                     quantitiesCounter[rnd]--;
                     return tilesArray[rnd];
+                } else {
+                    while (rnd < defaultQuantities.length) {
+                        rnd++;
+                        if (quantitiesCounter[rnd] != 0) {
+                            quantitiesCounter[rnd]--;
+                            return tilesArray[rnd];
+                        }
+
+                    }
                 }
             }
             return null;
-
         }
 
         public Tile getTile(char other) {
@@ -95,8 +101,7 @@ public class Tile {
                         quantitiesCounter[otherAsInt]--;
                         return tilesArray[otherAsInt];
                     }
-                }
-                else return null;
+                } else return null;
             }
             return null;
         }
@@ -111,18 +116,17 @@ public class Tile {
 
         public int[] getQuantities() {
             int[] quantities = new int[26];
-            System.arraycopy(quantitiesCounter,0,quantities,0,26);
+            System.arraycopy(quantitiesCounter, 0, quantities, 0, 26);
             return quantities;
 
         }
 
         public void put(Tile other) {
             if (size() < 98) {
-                if (other.letter >= 'A' && other.letter <= 'Z')
-                {
-                int tileToInt = other.letter - 'A';
-                if (quantitiesCounter[tileToInt] < defaultQuantities[tileToInt])
-                    quantitiesCounter[tileToInt]++;
+                if (other.letter >= 'A' && other.letter <= 'Z') {
+                    int tileToInt = other.letter - 'A';
+                    if (quantitiesCounter[tileToInt] < defaultQuantities[tileToInt])
+                        quantitiesCounter[tileToInt]++;
                 }
             }
         }

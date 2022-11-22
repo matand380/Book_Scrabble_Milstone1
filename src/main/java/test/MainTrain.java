@@ -75,6 +75,7 @@ public class MainTrain {
 		for(Tile t : ts)
 			bag.put(t);
 
+
 		Word horn=new Word(get("HORN"), 7, 5, false);
 		if(b.tryPlaceWord(horn)!=14)
 			System.out.println("problem in placeWord for 1st word (-10)");

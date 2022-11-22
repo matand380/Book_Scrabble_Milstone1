@@ -28,7 +28,8 @@ public class Word {
     }
 
     public Word(Tile[] tiles, int row, int col, boolean vertical) {
-        this.tiles = tiles;
+        this.tiles = new Tile[tiles.length];
+        System.arraycopy(tiles,0,this.tiles,0,tiles.length);
         this.row = row;
         this.col = col;
         this.vertical = vertical;
