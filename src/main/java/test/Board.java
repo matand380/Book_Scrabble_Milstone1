@@ -10,6 +10,8 @@ public class Board {
     public static final int tripleWord = 2;
     public static final int doubleLetter = 3;
     public static final int tripleLetter = 4;
+
+    public static final int centerBonus = 5;
     private static final int width = 15;
     private static final int height = 15;
     private static Board boardInstance = null;
@@ -77,8 +79,12 @@ public class Board {
             new Location(12, 2),
             new Location(12, 12),
             new Location(13, 1),
-            new Location(13, 13),
-            new Location(7, 7),};
+            new Location(13, 13),};
+
+    private final Location[] centerBonusLocation = new Location[]{
+            new Location(7, 7)
+    };
+    public  ArrayList<Word> tilesOnBoard = new ArrayList<Word>();
     private int wordCounter = 0;
     private Tile[][] gameGrid; // this is Tiles matrix for every game situation
     private Location[][] grid; //the base grid for the game
@@ -105,6 +111,10 @@ public class Board {
         for (Location loc : doubleWordLocation) {
             bonusTiles.put(loc, doubleWord);
         }
+        for (Location loc : centerBonusLocation) {
+            bonusTiles.put(loc, centerBonus);
+        }
+
         grid = new Location[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -143,11 +153,10 @@ public class Board {
 
     public Tile[][] getTiles() {
         return gameGrid.clone();
+
     }
 
     ///private  helper methods
-    private void setTiles(Word word) {
-    }
 
     public boolean boardLegal(Word word) {
         boolean gridLegal = isGridLegal(word);
@@ -169,15 +178,12 @@ public class Board {
     }
 
     public int getScore(Word word) {
-        // TODO: 22/11/2022 The function has to remove bonuses that already given
-        // TODO: 22/11/2022 resolve the get method in the hashmap
         Location[] checkBonus = wordToLocation(word);
         int sum = 0;
         int DW = 1;
         int TW = 1;
-
         for (Location l : checkBonus) {
-//            Integer y = bonusTiles.get(l);
+
             if (Arrays.stream(doubleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
                 sum += l.getTile().score * 2;
             } else if (Arrays.stream(tripleLetterLocation).anyMatch(location -> location.locationCompare(l))) {
@@ -190,6 +196,11 @@ public class Board {
             } else if (Arrays.stream(tripleWordLocation).anyMatch(location -> location.locationCompare(l))) {
                 sum += l.getTile().score;
                 TW = 3;
+            } else if (Arrays.stream(centerBonusLocation).anyMatch(location -> location.locationCompare(l)) && bonusTiles.containsValue(centerBonus)) {
+                sum += l.getTile().score;
+                DW = 2;
+                bonusTiles.remove(centerBonusLocation[0]);
+
             } else {
                 sum += l.getTile().score;
             }
@@ -206,7 +217,6 @@ public class Board {
             for (Word w : words) {
                 if (dictionaryLegal(w)) {
                     setWordCounter(getWordCounter() + 1);
-                   setTilesOnBoard(w);
                     sum += getScore(w);
                 }
             }
@@ -215,16 +225,139 @@ public class Board {
     }
 
 
-    // TODO: 17/11/2022 keep working
     public ArrayList<Word> getWords(Word word) {
         ArrayList<Word> temp = new ArrayList<>();
-        temp.add(word);
-        return temp;
+        ArrayList<Word> wordsArr = new ArrayList<>();
+        Tile[] newWord = new Tile[word.getTiles().length];
+        if (word.isVertical()) {
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null)
+                    newWord[i] = word.getTiles()[i];
+                else
+                    newWord[i] = gameGrid[word.getRow() + i][word.getCol()];
+            }
+            Word currentWord = new Word(newWord, word.getRow(), word.getCol(), word.isVertical());
+            temp.add(currentWord);
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null) {
+                    if (gameGrid[word.getRow() + i][word.getCol() - 1] != null || gameGrid[word.getRow() + i][word.getCol() + 1] != null) {
+                        temp.add(horizontalWord(word.getRow() + i, word.getCol(), word.getTiles()[i]));
+                    }
+                }
+            }
+            if (gameGrid[word.getRow() + word.getTiles().length][word.getCol()] != null || gameGrid[word.getRow() - 1][word.getCol()] != null) {
+                Word tempW = checkPartOfVertical(word.getRow(), word.getCol(), word);
+                if (tempW != word)
+                    temp.add(tempW);
+            }
+        } else {
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null)
+                    newWord[i] = word.getTiles()[i];
+                else
+                    newWord[i] = gameGrid[word.getRow()][word.getCol() + i];
+            }
+            Word currentWord = new Word(newWord, word.getRow(), word.getCol(), word.isVertical());
+            temp.add(currentWord);
+            for (int i = 0; i < word.getTiles().length; i++) {
+                if (word.getTiles()[i] != null) {
+                    if (gameGrid[word.getRow() + 1][word.getCol() + i] != null || gameGrid[word.getRow() - 1][word.getCol() + i] != null) {
+                        temp.add(verticalWord(word.getRow(), word.getCol() + i, word.getTiles()[i]));
+                    }
+                }
+            }
+            if (gameGrid[word.getRow()][word.getCol() + word.getTiles().length] != null || gameGrid[word.getRow()][word.getCol() - 1] != null) {
+                Word tempW = checkPartOfHorizontal(word.getRow(), word.getCol(), word);
+                if (tempW != word)
+                    temp.add(tempW);
+            }
+        }
+        for (Word w : temp) {
+            if (!tilesOnBoard.contains(w)) {
+                setTilesOnBoard(w);
+                wordsArr.add(w);
+            }
+        }
+        return wordsArr;
+
     }
 
 
+    private Word verticalWord(int row, int col, Tile tile) {
+        int currentCol = row;
+        int rowBegin;
+        while (currentCol - 1 >= 0 && gameGrid[currentCol - 1][col] != null) {
+            currentCol--;
+        }
+        rowBegin = currentCol;
+        if (gameGrid[currentCol][col] == null) {
+            currentCol++;
+        }
+        ArrayList<Tile> temp = new ArrayList<>();
+        while (currentCol <= 14 && currentCol < row && gameGrid[currentCol][col] != null) {
+            temp.add(gameGrid[currentCol][col]);
+            currentCol++;
+        }
+
+        temp.add(tile);
+        currentCol = row + 1;
+        while (currentCol <= 14 && gameGrid[currentCol][col] != null) {
+            temp.add(gameGrid[currentCol][col]);
+            currentCol++;
+        }
+        Tile[] tiles = new Tile[(temp.size())];
+        for (int i = 0; i < temp.size(); i++) {
+            tiles[i] = temp.get(i);
+        }
+        return new Word(tiles, rowBegin, col, true);
+    }
+
+    private Word horizontalWord(int row, int col, Tile tile) {
+        int currentCol = col;
+        int colBegin;
+        while (currentCol - 1 >= 0 && gameGrid[row][currentCol - 1] != null) {
+            currentCol--;
+        }
+        colBegin = currentCol;
+        if (gameGrid[row][currentCol] == null) {
+            currentCol++;
+        }
+        ArrayList<Tile> temp = new ArrayList<>();
+        while (currentCol <= 14 && currentCol < col && gameGrid[row][currentCol] != null) {
+            temp.add(gameGrid[row][currentCol]);
+            currentCol++;
+        }
+
+        temp.add(tile);
+        currentCol = col + 1;
+        while (currentCol <= 14 && gameGrid[row][currentCol] != null) {
+            temp.add(gameGrid[row][currentCol]);
+            currentCol++;
+        }
+        Tile[] tiles = new Tile[(temp.size())];
+        for (int i = 0; i < temp.size(); i++) {
+            tiles[i] = temp.get(i);
+        }
+        return new Word(tiles, row, colBegin, false);
+    }
+
+    private Word checkPartOfHorizontal(int row, int col, Word word) {
+        Word newWord = horizontalWord(row, col, word.getTiles()[0]);
+        if (newWord.getTiles().length != word.getTiles().length) {
+            return newWord;
+        }
+        return word;
+    }
+
+    private Word checkPartOfVertical(int row, int col, Word word) {
+        Word newWord = verticalWord(row, col, word.getTiles()[0]);
+        if (newWord.getTiles().length != word.getTiles().length) {
+            return newWord;
+        }
+        return word;
+    }
+
     private void setTilesOnBoard(Word word) {
-        // TODO: 22/11/2022 remove tiles of the word from the quantitiesCounter
         int i;
         if (word.isVertical()) {
             for (i = 0; i < word.getTiles().length; i++) {
@@ -245,7 +378,6 @@ public class Board {
             }
     }
 
-    //gets the word without the required replacement (e.g. without R in FARMS)
     private boolean notRequireLetterReplacement(Word word) {
         int i;
         if (word.isVertical()) {
@@ -270,7 +402,6 @@ public class Board {
 
     }
 
-    // TODO: 17/11/2022 check again this method in the end
     private boolean isTileConnected(Word word) {
         int currRow = word.getRow(), currCol = word.getCol();
         for (int i = 0; i < word.getTiles().length; i++) {
@@ -315,12 +446,9 @@ public class Board {
         Location[] temp = new Location[word.getTiles().length];
         if (word.isVertical()) {
             for (int i = 0; i < word.getTiles().length; i++) {
-                if (word.getTiles()[i]!=null)
-                {
-                temp[i] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
-                }
-                else if (word.getTiles()[i]==null)
-                {
+                if (word.getTiles()[i] != null) {
+                    temp[i] = new Location(word.getRow() + i, word.getCol(), word.getTiles()[i]);
+                } else if (word.getTiles()[i] == null) {
                     temp[i] = new Location(word.getRow() + i, word.getCol(), gameGrid[word.getRow() + i][word.getCol()]);
 
                 }
@@ -328,23 +456,21 @@ public class Board {
             }
         } else
             for (int i = 0; i < word.getTiles().length; i++) {
-                if (word.getTiles()[i]!=null){
+                if (word.getTiles()[i] != null) {
                     temp[i] = new Location(word.getRow(), word.getCol() + i, word.getTiles()[i]);
-            }
-            else if (word.getTiles()[i]==null)
-        {
-            temp[i] = new Location(word.getRow(), word.getCol() + i, gameGrid[word.getRow()][word.getCol()+i]);
+                } else if (word.getTiles()[i] == null) {
+                    temp[i] = new Location(word.getRow(), word.getCol() + i, gameGrid[word.getRow()][word.getCol() + i]);
 
-        }
+                }
             }
         return temp;
     }
 
 
     //helper class - Location
-    public class Location {
-        private int x;
-        private int y;
+    public  class Location {
+        private  int x;
+        private  int y;
         private Tile tile;
 
 
@@ -389,7 +515,8 @@ public class Board {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Location location)) return false;
+            if (o == null || getClass() != o.getClass()) return false;
+            Location location = (Location) o;
             return x == location.x && y == location.y && Objects.equals(tile, location.tile);
         }
 
@@ -399,54 +526,3 @@ public class Board {
         }
     }
 }
-
-/*
-*Checklist for new words:
-*
-* Word is in the grid
-* private boolean isValidLocation(int x, int y){
-		return x>=0 && y>=0 && x<width && y< height;
-	}
-
-* Word is vertical - true/false
-* First word has to be row 7 or col 7
-* 	private boolean validFirstMove(List<Location> wordPlayed)
-
-* New word has to be connected to existing one or using existing tiles
-* doesn't need to replace existing tiles - comparing chars
-* getWords -
-*   check if dictionaryLegal (meanwhile - always true)
-*   return Tile[] of all the new words that has been created from the word we put, includes the word we put
-*   return type is ArrayList<Word>
-*getScore
-*   this check has to be done for every word in the ArrayList from getWords
-*   checks first triple/double letters - checkBonusLetter method
-*   sum all the letters after bonuses (if exist) - sumTiles method
-*   check if word is on triple/double word - checkBonusWord method
-*   return sumTiles*checkBonusWord
-*
-*flow
-*   given an optional word:
-*       check if it is in the grid
-*       return ArrayList of all new words it creates
-*       for each word in the ArrayList check if it's dictionaryLegal
-*       getScore for every word in the ArrayList
-*       only if all words are legal we will sum all of its getScore
-*
-*
-*
-*
-* public boolean isValidLocation(Location loc) {
-		return loc!=null && isValidLocation(loc.getX(), loc.getY());
-*
-*
-* //given a location, return the Location stored in the grids[][] on this board
-	private Location getBoardLocation(Location loc){
-		if(!isValidLocation(loc))
-			return null;
-		return grids[loc.getX()][loc.getY()];
-*
-*
-* 	private Tile findAndRemoveSpecialTile(Location loc) //if bonus already given
-
- */

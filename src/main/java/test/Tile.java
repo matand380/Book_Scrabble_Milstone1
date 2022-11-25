@@ -16,7 +16,8 @@ public class Tile {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Tile tile)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tile tile = (Tile) o;
         return letter == tile.letter && score == tile.score;
     }
 
@@ -75,13 +76,15 @@ public class Tile {
 
         public Tile getRand() {
             if (size() > 0) {
-                int rnd = new Random().nextInt(defaultQuantities.length);
+                int rnd = new Random().nextInt(26);
                 if (quantitiesCounter[rnd] != 0) {
                     quantitiesCounter[rnd]--;
                     return tilesArray[rnd];
                 } else {
-                    while (rnd < defaultQuantities.length) {
+                    while (rnd <= defaultQuantities.length) {
                         rnd++;
+                        if (rnd == defaultQuantities.length)
+                            rnd = defaultQuantities[0];
                         if (quantitiesCounter[rnd] != 0) {
                             quantitiesCounter[rnd]--;
                             return tilesArray[rnd];
