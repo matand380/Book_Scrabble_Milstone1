@@ -208,6 +208,18 @@ public class Board {
         return sum * TW * DW;
     }
 
+    /**
+     * The tryPlaceWord function takes a Word object as an argument and returns the score of that word.
+     * It first checks if the word is legal in both the dictionary and on the board, then it adds up all
+     * words formed by placing this new word on top of existing words. If any of these newly formed words are not legal,
+     * the total score is zero. The function returns 0 if either dictionaryLegal or boardLegal return false for this new Word object.
+     *
+     * @param Word word Get the words that are affected by placing word on the board
+     *
+     * @return The score of the word
+     *
+     *
+     */
     public int tryPlaceWord(Word word) {
         boolean dictionaryLegal = dictionaryLegal(word);
         boolean boardLegal = boardLegal(word);
